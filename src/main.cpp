@@ -138,11 +138,11 @@
 namespace
 {
   // Change the part in brackets to your WiFi name
-  const char *SSID = "xxx";
+  const char *SSID = "ZTE-972ec0";
   // Change the part in brackets to your WiFi password
-  const char *PASSWORD = "xxx";
+  const char *PASSWORD = "hf170798";
   // Change the part in brackets to your Duino-Coin username
-  const char *USERNAME = "xxx";
+  const char *USERNAME = "hafidh";
   // Change the part in brackets if you want to set a custom miner name (use Auto to autogenerate, None for no name)
   const char *RIG_IDENTIFIER = "None";
   // Change the part in brackets to your mining key (if you enabled it in the wallet)
@@ -460,7 +460,7 @@ void FirmwareUpdateCheck()
     String URL_fw_Bin= "https://"+String(firmware_host)+"/hafidh7/DuinoCoin-Auto-Update-Firmware-ESP8266/master/firmware/DuinoCoin_Auto_ESP8266.bin";
     WiFiClientSecure client;
 
-    Serial.println("Cek Firmware Update");
+    Serial.println("Firmware Update Check");
     client.setTrustAnchors(&cert);
     if (!client.connect(firmware_host, firmware_port)) {
         Serial.print("Failed Connecting to ");
