@@ -159,7 +159,7 @@ namespace
 /* Do not change the lines below. These lines are static and dynamic variables
    that will be used by the program for counters and measurements. */
 const char * DEVICE = "ESP8266";
-const String FirmwareVer={"0.1"};
+const String FirmwareVersion={"0.1"};
 const char * POOLPICKER_URL[] = {"https://server.duinocoin.com/getPool"};
 const char * MINER_BANNER = "Official ESP8266 Miner";
 const char * MINER_VER = "3.18";
@@ -627,7 +627,8 @@ void FirmwareUpdateCheck()
     X509List cert(cert_DigiCert_Global_Root_CA);
     //change URL_fw_Version and URL_fw_Bin with your bin file and version url.
     #define URL_fw_Version "/hafidh7/DuinoCoin-Auto-Update-Firmware-ESP8266/master/version.txt"
-    #define URL_fw_Bin "https://raw.githubusercontent.com/hafidh7/DuinoCoin-Auto-Update-Firmware-ESP8266/master/.pio/build/nodemcuv2/firmware.bin"
+    // #define URL_fw_Bin "https://github.com/hafidh7/DuinoCoin-Auto-Update-Firmware-ESP8266/releases/download/v0.1/DuinoCoin.Auto.ESP8266.bin"
+    String URL_fw_Bin;
     WiFiClientSecure client;
 
     Serial.println("Cek Firmware Update");
@@ -647,14 +648,15 @@ void FirmwareUpdateCheck()
     }
     String payload = client.readStringUntil('\n');
     payload.trim();
-    if(payload.equals(FirmwareVer)) {
+    if(payload.equals(FirmwareVersion)) {
         Serial.println("Device already on latest firmware version");
     }
     else {
         Serial.println("New firmware detected");
-        Serial.println("Current firmware version "+FirmwareVer);
+        Serial.println("Current firmware version "+FirmwareVersion);
         Serial.println("Firmware version "+payload+" is avalable");
         ESPhttpUpdate.setLedPin(LED_BUILTIN, LOW);
+        URL_fw_Bin = "https://github.com/hafidh7/DuinoCoin-Auto-Update-Firmware-ESP8266/releases/download/v"+payload+"/DuinoCoin.Auto.ESP8266.bin";
         t_httpUpdate_return ret = ESPhttpUpdate.update(client, URL_fw_Bin);
         Serial.println("Update firmware to version "+payload);
         switch (ret) {
