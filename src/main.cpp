@@ -626,9 +626,9 @@ void FirmwareUpdateCheck()
 {
     X509List cert(cert_DigiCert_Global_Root_CA);
     //change URL_fw_Version and URL_fw_Bin with your bin file and version url.
-    #define URL_fw_Version "/hafidh7/DuinoCoin-Auto-Update-Firmware-ESP8266/master/version.txt"
-    // #define URL_fw_Bin "https://github.com/hafidh7/DuinoCoin-Auto-Update-Firmware-ESP8266/releases/download/v0.1/DuinoCoin.Auto.ESP8266.bin"
-    String URL_fw_Bin;
+    #define URL_fw_Version "/hafidh7/DuinoCoin-Auto-Update-Firmware-ESP8266/master/firmware/version.txt"
+    // #define URL_fw_Bin "https://github.com/hafidh7/DuinoCoin-Auto-Update-Firmware-ESP8266/releases/download/v0.1/DuinoCoin_Auto_ESP8266.bin"
+    String URL_fw_Bin= String(firmware_host)+"/hafidh7/DuinoCoin-Auto-Update-Firmware-ESP8266/master/firmware/DuinoCoin_Auto_ESP8266.bin";
     WiFiClientSecure client;
 
     Serial.println("Cek Firmware Update");
@@ -656,7 +656,6 @@ void FirmwareUpdateCheck()
         Serial.println("Current firmware version "+FirmwareVersion);
         Serial.println("Firmware version "+payload+" is avalable");
         ESPhttpUpdate.setLedPin(LED_BUILTIN, LOW);
-        URL_fw_Bin = "https://github.com/hafidh7/DuinoCoin-Auto-Update-Firmware-ESP8266/releases/download/v"+payload+"/DuinoCoin.Auto.ESP8266.bin";
         t_httpUpdate_return ret = ESPhttpUpdate.update(client, URL_fw_Bin);
         Serial.println("Update firmware to version "+payload);
         switch (ret) {
