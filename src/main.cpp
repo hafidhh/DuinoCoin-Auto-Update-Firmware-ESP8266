@@ -137,12 +137,12 @@
 
 namespace
 {
-  // Change the part in brackets to your WiFi name
-  const char *SSID = "ZTE-972ec0";
+ // Change the part in brackets to your WiFi name
+  const char *SSID = "My cool wifi name";
   // Change the part in brackets to your WiFi password
-  const char *PASSWORD = "hf170798";
+  const char *PASSWORD = "My secret wifi pass";
   // Change the part in brackets to your Duino-Coin username
-  const char *USERNAME = "hafidh";
+  const char *USERNAME = "my_cool_username";
   // Change the part in brackets if you want to set a custom miner name (use Auto to autogenerate, None for no name)
   const char *RIG_IDENTIFIER = "None";
   // Change the part in brackets to your mining key (if you enabled it in the wallet)
