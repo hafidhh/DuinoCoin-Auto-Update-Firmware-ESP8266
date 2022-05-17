@@ -138,11 +138,11 @@
 namespace
 {
   // Change the part in brackets to your WiFi name
-  const char *SSID = "ZTE-972ec0";
+  const char *SSID = "xxx";
   // Change the part in brackets to your WiFi password
-  const char *PASSWORD = "hf170798";
+  const char *PASSWORD = "xxx";
   // Change the part in brackets to your Duino-Coin username
-  const char *USERNAME = "hafidh";
+  const char *USERNAME = "xxx";
   // Change the part in brackets if you want to set a custom miner name (use Auto to autogenerate, None for no name)
   const char *RIG_IDENTIFIER = "None";
   // Change the part in brackets to your mining key (if you enabled it in the wallet)
@@ -432,6 +432,77 @@ unsigned long lwdTimeOutMillis = LWD_TIMEOUT;
 #define BLINK_CLIENT_CONNECT 3
 #define BLINK_RESET_DEVICE   5
 
+void setClock()
+{
+    // Set time via NTP, as required for x.509 validation
+    configTime(0, 0, "pool.ntp.org", "time.nist.gov");
+    Serial.println("Waiting for NTP time sync");
+    time_t now = time(nullptr);
+    while (now < 8 * 3600 * 2) {
+        delay(500);
+        Serial.print(".");
+        now = time(nullptr);
+    }
+    Serial.println("");
+    struct tm timeinfo;
+    gmtime_r(&now, &timeinfo);
+    Serial.print("Current time: ");
+    Serial.println(asctime(&timeinfo));
+}
+
+void FirmwareUpdateCheck()
+{
+    setClock();
+    X509List cert(cert_DigiCert_Global_Root_CA);
+    //change URL_fw_Version and URL_fw_Bin with your bin file and version url.
+    #define URL_fw_Version "/hafidh7/DuinoCoin-Auto-Update-Firmware-ESP8266/master/firmware/version.txt"
+    // #define URL_fw_Bin "https://github.com/hafidh7/DuinoCoin-Auto-Update-Firmware-ESP8266/releases/download/v0.1/DuinoCoin_Auto_ESP8266.bin"
+    String URL_fw_Bin= "https://"+String(firmware_host)+"/hafidh7/DuinoCoin-Auto-Update-Firmware-ESP8266/master/firmware/DuinoCoin_Auto_ESP8266.bin";
+    WiFiClientSecure client;
+
+    Serial.println("Cek Firmware Update");
+    client.setTrustAnchors(&cert);
+    if (!client.connect(firmware_host, firmware_port)) {
+        Serial.print("Failed Connecting to ");
+        Serial.println(firmware_host);
+        return;
+    }
+    client.print(String("GET ") + URL_fw_Version + " HTTP/1.1\r\n" + "Host: " + firmware_host + "\r\n" + "User-Agent: BuildFailureDetectorESP8266\r\n" + "Connection: close\r\n\r\n");
+    while (client.connected()) {
+        String line = client.readStringUntil('\n');
+        if (line == "\r") {
+            //Serial.println("Headers received");
+            break;
+        }
+    }
+    String payload = client.readStringUntil('\n');
+    payload.trim();
+    if(payload.equals(FirmwareVersion)) {
+        Serial.println("Device already on latest firmware version");
+    }
+    else {
+        Serial.println("New firmware detected");
+        Serial.println("Current firmware version "+FirmwareVersion);
+        Serial.println("Firmware version "+payload+" is avalable");
+        ESPhttpUpdate.setLedPin(LED_BUILTIN, LOW);
+        t_httpUpdate_return ret = ESPhttpUpdate.update(client, URL_fw_Bin);
+        Serial.println("Update firmware to version "+payload);
+        switch (ret) {
+            case HTTP_UPDATE_FAILED:
+            Serial.printf("HTTP_UPDATE_FAILD Error (%d): %s\n", ESPhttpUpdate.getLastError(), ESPhttpUpdate.getLastErrorString().c_str());
+            break;
+
+            case HTTP_UPDATE_NO_UPDATES:
+            Serial.println("HTTP_UPDATE_NO_UPDATES");
+            break;
+
+            case HTTP_UPDATE_OK:
+            Serial.println("HTTP_UPDATE_OK");
+            break;
+        }
+    }
+}
+
 void SetupWifi() {
   Serial.println("Connecting to: " + String(SSID));
   WiFi.mode(WIFI_STA); // Setup ESP in client mode
@@ -452,6 +523,8 @@ void SetupWifi() {
   Serial.println("Local IP address: " + WiFi.localIP().toString());
   Serial.println("Rig name: " + String(RIG_IDENTIFIER));
   Serial.println();
+
+  FirmwareUpdateCheck();
 
   UpdatePool();
 }
@@ -604,76 +677,6 @@ void dashboard() {
   server.send(200, "text/html", s);
 }
 
-void setClock()
-{
-    // Set time via NTP, as required for x.509 validation
-    configTime(0, 0, "pool.ntp.org", "time.nist.gov");
-    Serial.println("Waiting for NTP time sync");
-    time_t now = time(nullptr);
-    while (now < 8 * 3600 * 2) {
-        delay(500);
-        Serial.print(".");
-        now = time(nullptr);
-    }
-    Serial.println("");
-    struct tm timeinfo;
-    gmtime_r(&now, &timeinfo);
-    Serial.print("Current time: ");
-    Serial.println(asctime(&timeinfo));
-}
-
-void FirmwareUpdateCheck()
-{
-    X509List cert(cert_DigiCert_Global_Root_CA);
-    //change URL_fw_Version and URL_fw_Bin with your bin file and version url.
-    #define URL_fw_Version "/hafidh7/DuinoCoin-Auto-Update-Firmware-ESP8266/master/firmware/version.txt"
-    // #define URL_fw_Bin "https://github.com/hafidh7/DuinoCoin-Auto-Update-Firmware-ESP8266/releases/download/v0.1/DuinoCoin_Auto_ESP8266.bin"
-    String URL_fw_Bin= String(firmware_host)+"/hafidh7/DuinoCoin-Auto-Update-Firmware-ESP8266/master/firmware/DuinoCoin_Auto_ESP8266.bin";
-    WiFiClientSecure client;
-
-    Serial.println("Cek Firmware Update");
-    client.setTrustAnchors(&cert);
-    if (!client.connect(firmware_host, firmware_port)) {
-        Serial.print("Failed Connecting to ");
-        Serial.println(firmware_host);
-        return;
-    }
-    client.print(String("GET ") + URL_fw_Version + " HTTP/1.1\r\n" + "Host: " + firmware_host + "\r\n" + "User-Agent: BuildFailureDetectorESP8266\r\n" + "Connection: close\r\n\r\n");
-    while (client.connected()) {
-        String line = client.readStringUntil('\n');
-        if (line == "\r") {
-            //Serial.println("Headers received");
-            break;
-        }
-    }
-    String payload = client.readStringUntil('\n');
-    payload.trim();
-    if(payload.equals(FirmwareVersion)) {
-        Serial.println("Device already on latest firmware version");
-    }
-    else {
-        Serial.println("New firmware detected");
-        Serial.println("Current firmware version "+FirmwareVersion);
-        Serial.println("Firmware version "+payload+" is avalable");
-        ESPhttpUpdate.setLedPin(LED_BUILTIN, LOW);
-        t_httpUpdate_return ret = ESPhttpUpdate.update(client, URL_fw_Bin);
-        Serial.println("Update firmware to version "+payload);
-        switch (ret) {
-            case HTTP_UPDATE_FAILED:
-            Serial.printf("HTTP_UPDATE_FAILD Error (%d): %s\n", ESPhttpUpdate.getLastError(), ESPhttpUpdate.getLastErrorString().c_str());
-            break;
-
-            case HTTP_UPDATE_NO_UPDATES:
-            Serial.println("HTTP_UPDATE_NO_UPDATES");
-            break;
-
-            case HTTP_UPDATE_OK:
-            Serial.println("HTTP_UPDATE_OK");
-            break;
-        }
-    }
-}
-
 } // namespace
 
 void setup() {
@@ -703,8 +706,6 @@ void setup() {
 
   SetupWifi();
   SetupOTA();
-  setClock();
-  FirmwareUpdateCheck();
 
   lwdtFeed();
   lwdTimer.attach_ms(LWD_TIMEOUT, lwdtcb);
