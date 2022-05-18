@@ -50,13 +50,90 @@
 #include "certs.h"
 
 // Uncomment the line below if you wish to use a DHT sensor (Duino IoT beta)
-// #define USE_DHT
+#define USE_DHT
 
 // Uncomment the line below if you wish to register for IOT updates with an MQTT broker
 // #define USE_MQTT
 
 // If you don't know what MQTT means check this link:
 // https://www.techtarget.com/iotagenda/definition/MQTT-MQ-Telemetry-Transport
+
+#ifdef USE_DHT
+  float temp = 0.0;
+  float hum = 0.0;
+
+  // Install "DHT sensor library" if you get an error
+  #include <DHT.h>
+  // Change D3 to the pin you've connected your sensor to
+  #define DHTPIN D3
+  // Set DHT11 or DHT22 accordingly
+  #define DHTTYPE DHT11
+
+  DHT dht(DHTPIN, DHTTYPE);
+#endif
+
+#ifdef USE_MQTT
+  // Install "PubSubClient" if you get an error
+  #include <PubSubClient.h>
+
+  long lastMsg = 0;
+
+  // Change the part in brackets to your MQTT broker address
+  #define mqtt_server "broker.hivemq.com"
+  // broker.hivemq.com is for testing purposes, change it to your broker address
+
+  // Change this to your MQTT broker port
+  #define mqtt_port 1883
+  // If you want to use user and password for your MQTT broker, uncomment the line below
+  // #define mqtt_use_credentials
+
+  // Change the part in brackets to your MQTT broker username
+  #define mqtt_user "My cool mqtt username"
+  // Change the part in brackets to your MQTT broker password
+  #define mqtt_password "My secret mqtt pass"
+
+  // Change this if you want to send data to the topic every X milliseconds
+  #define mqtt_update_time 5000
+
+  // Change the part in brackets to your MQTT humidity topic
+  #define humidity_topic "sensor/humidity"
+  // Change the part in brackets to your MQTT temperature topic
+  #define temperature_topic "sensor/temperature"
+
+  WiFiClient espClient;
+  PubSubClient mqttClient(espClient);
+
+  void mqttReconnect()
+  {
+    // Loop until we're reconnected
+    while (!mqttClient.connected())
+    {
+      Serial.print("Attempting MQTT connection...");
+
+      // Create a random client ID
+      String clientId = "ESP8266Client-";
+      clientId += String(random(0xffff), HEX);
+
+      // Attempt to connect
+      #ifdef mqtt_use_credentials
+        if (mqttClient.connect("ESP8266Client", mqtt_user, mqtt_password))
+      #else
+        if (mqttClient.connect(clientId.c_str()))
+      #endif
+      {
+        Serial.println("connected");
+      }
+      else
+      {
+        Serial.print("failed, rc=");
+        Serial.print(mqttClient.state());
+        Serial.println(" try again in 5 seconds");
+        // Wait 5 seconds before retrying
+        delay(5000);
+      }
+    }
+  }
+#endif
 
 namespace
 {
@@ -262,83 +339,6 @@ const char WEBSITE[] PROGMEM = R"=====(
 </body>
 </html>
 )=====";
-
-#ifdef USE_DHT
-  float temp = 0.0;
-  float hum = 0.0;
-
-  // Install "DHT sensor library" if you get an error
-  #include <DHT.h>
-  // Change D3 to the pin you've connected your sensor to
-  #define DHTPIN D3
-  // Set DHT11 or DHT22 accordingly
-  #define DHTTYPE DHT11
-
-  DHT dht(DHTPIN, DHTTYPE);
-#endif
-
-#ifdef USE_MQTT
-  // Install "PubSubClient" if you get an error
-  #include <PubSubClient.h>
-
-  long lastMsg = 0;
-
-  // Change the part in brackets to your MQTT broker address
-  #define mqtt_server "broker.hivemq.com"
-  // broker.hivemq.com is for testing purposes, change it to your broker address
-
-  // Change this to your MQTT broker port
-  #define mqtt_port 1883
-  // If you want to use user and password for your MQTT broker, uncomment the line below
-  // #define mqtt_use_credentials
-
-  // Change the part in brackets to your MQTT broker username
-  #define mqtt_user "My cool mqtt username"
-  // Change the part in brackets to your MQTT broker password
-  #define mqtt_password "My secret mqtt pass"
-
-  // Change this if you want to send data to the topic every X milliseconds
-  #define mqtt_update_time 5000
-
-  // Change the part in brackets to your MQTT humidity topic
-  #define humidity_topic "sensor/humidity"
-  // Change the part in brackets to your MQTT temperature topic
-  #define temperature_topic "sensor/temperature"
-
-  WiFiClient espClient;
-  PubSubClient mqttClient(espClient);
-
-  void mqttReconnect()
-  {
-    // Loop until we're reconnected
-    while (!mqttClient.connected())
-    {
-      Serial.print("Attempting MQTT connection...");
-
-      // Create a random client ID
-      String clientId = "ESP8266Client-";
-      clientId += String(random(0xffff), HEX);
-
-      // Attempt to connect
-      #ifdef mqtt_use_credentials
-        if (mqttClient.connect("ESP8266Client", mqtt_user, mqtt_password))
-      #else
-        if (mqttClient.connect(clientId.c_str()))
-      #endif
-      {
-        Serial.println("connected");
-      }
-      else
-      {
-        Serial.print("failed, rc=");
-        Serial.print(mqttClient.state());
-        Serial.println(" try again in 5 seconds");
-        // Wait 5 seconds before retrying
-        delay(5000);
-      }
-    }
-  }
-#endif
 
 ESP8266WebServer server(80);
 
