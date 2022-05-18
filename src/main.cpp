@@ -58,93 +58,12 @@
 // If you don't know what MQTT means check this link:
 // https://www.techtarget.com/iotagenda/definition/MQTT-MQ-Telemetry-Transport
 
-#ifdef USE_DHT
-  float temp = 0.0;
-  float hum = 0.0;
-
-  // Install "DHT sensor library" if you get an error
-  #include <DHT.h>
-  // Change D3 to the pin you've connected your sensor to
-  #define DHTPIN D3
-  // Set DHT11 or DHT22 accordingly
-  #define DHTTYPE DHT11
-
-  DHT dht(DHTPIN, DHTTYPE);
-#endif
-
-#ifdef USE_MQTT
-  // Install "PubSubClient" if you get an error
-  #include <PubSubClient.h>
-
-  long lastMsg = 0;
-
-  // Change the part in brackets to your MQTT broker address
-  #define mqtt_server "broker.hivemq.com"
-  // broker.hivemq.com is for testing purposes, change it to your broker address
-
-  // Change this to your MQTT broker port
-  #define mqtt_port 1883
-  // If you want to use user and password for your MQTT broker, uncomment the line below
-  // #define mqtt_use_credentials
-
-  // Change the part in brackets to your MQTT broker username
-  #define mqtt_user "My cool mqtt username"
-  // Change the part in brackets to your MQTT broker password
-  #define mqtt_password "My secret mqtt pass"
-
-  // Change this if you want to send data to the topic every X milliseconds
-  #define mqtt_update_time 5000
-
-  // Change the part in brackets to your MQTT humidity topic
-  #define humidity_topic "sensor/humidity"
-  // Change the part in brackets to your MQTT temperature topic
-  #define temperature_topic "sensor/temperature"
-
-  WiFiClient espClient;
-  PubSubClient mqttClient(espClient);
-
-  void mqttReconnect()
-  {
-    // Loop until we're reconnected
-    while (!mqttClient.connected())
-    {
-      Serial.print("Attempting MQTT connection...");
-
-      // Create a random client ID
-      String clientId = "ESP8266Client-";
-      clientId += String(random(0xffff), HEX);
-
-      // Attempt to connect
-      #ifdef mqtt_use_credentials
-        if (mqttClient.connect("ESP8266Client", mqtt_user, mqtt_password))
-      #else
-        if (mqttClient.connect(clientId.c_str()))
-      #endif
-      {
-        Serial.println("connected");
-      }
-      else
-      {
-        Serial.print("failed, rc=");
-        Serial.print(mqttClient.state());
-        Serial.println(" try again in 5 seconds");
-        // Wait 5 seconds before retrying
-        delay(5000);
-      }
-    }
-  }
-#endif
-
 namespace
 {
- // Change the part in brackets to your WiFi name
-  const char *SSID = "My cool wifi name";
-  // Change the part in brackets to your WiFi password
-  const char *PASSWORD = "My secret wifi pass";
   // Change the part in brackets to your Duino-Coin username
   const char *USERNAME = "my_cool_username";
   // Change the part in brackets if you want to set a custom miner name (use Auto to autogenerate, None for no name)
-  const char *RIG_IDENTIFIER = "None";
+  const char *RIG_IDENTIFIER = "Auto";
   // Change the part in brackets to your mining key (if you enabled it in the wallet)
   const char *MINER_KEY = "None";
   // Change false to true if using 160 MHz clock mode to not get the first share rejected
@@ -159,7 +78,6 @@ namespace
 /* Do not change the lines below. These lines are static and dynamic variables
    that will be used by the program for counters and measurements. */
 const char * DEVICE = "ESP8266";
-const String FirmwareVersion={"0.1"};
 const char * POOLPICKER_URL[] = {"https://server.duinocoin.com/getPool"};
 const char * MINER_BANNER = "Official ESP8266 Miner";
 const char * MINER_VER = "3.18";
@@ -345,6 +263,83 @@ const char WEBSITE[] PROGMEM = R"=====(
 </html>
 )=====";
 
+#ifdef USE_DHT
+  float temp = 0.0;
+  float hum = 0.0;
+
+  // Install "DHT sensor library" if you get an error
+  #include <DHT.h>
+  // Change D3 to the pin you've connected your sensor to
+  #define DHTPIN D3
+  // Set DHT11 or DHT22 accordingly
+  #define DHTTYPE DHT11
+
+  DHT dht(DHTPIN, DHTTYPE);
+#endif
+
+#ifdef USE_MQTT
+  // Install "PubSubClient" if you get an error
+  #include <PubSubClient.h>
+
+  long lastMsg = 0;
+
+  // Change the part in brackets to your MQTT broker address
+  #define mqtt_server "broker.hivemq.com"
+  // broker.hivemq.com is for testing purposes, change it to your broker address
+
+  // Change this to your MQTT broker port
+  #define mqtt_port 1883
+  // If you want to use user and password for your MQTT broker, uncomment the line below
+  // #define mqtt_use_credentials
+
+  // Change the part in brackets to your MQTT broker username
+  #define mqtt_user "My cool mqtt username"
+  // Change the part in brackets to your MQTT broker password
+  #define mqtt_password "My secret mqtt pass"
+
+  // Change this if you want to send data to the topic every X milliseconds
+  #define mqtt_update_time 5000
+
+  // Change the part in brackets to your MQTT humidity topic
+  #define humidity_topic "sensor/humidity"
+  // Change the part in brackets to your MQTT temperature topic
+  #define temperature_topic "sensor/temperature"
+
+  WiFiClient espClient;
+  PubSubClient mqttClient(espClient);
+
+  void mqttReconnect()
+  {
+    // Loop until we're reconnected
+    while (!mqttClient.connected())
+    {
+      Serial.print("Attempting MQTT connection...");
+
+      // Create a random client ID
+      String clientId = "ESP8266Client-";
+      clientId += String(random(0xffff), HEX);
+
+      // Attempt to connect
+      #ifdef mqtt_use_credentials
+        if (mqttClient.connect("ESP8266Client", mqtt_user, mqtt_password))
+      #else
+        if (mqttClient.connect(clientId.c_str()))
+      #endif
+      {
+        Serial.println("connected");
+      }
+      else
+      {
+        Serial.print("failed, rc=");
+        Serial.print(mqttClient.state());
+        Serial.println(" try again in 5 seconds");
+        // Wait 5 seconds before retrying
+        delay(5000);
+      }
+    }
+  }
+#endif
+
 ESP8266WebServer server(80);
 
 void hashupdater(){ //update hashrate every 3 sec in browser without reloading page
@@ -434,76 +429,82 @@ unsigned long lwdTimeOutMillis = LWD_TIMEOUT;
 
 void setClock()
 {
-    // Set time via NTP, as required for x.509 validation
-    configTime(0, 0, "pool.ntp.org", "time.nist.gov");
-    Serial.println("Waiting for NTP time sync");
-    time_t now = time(nullptr);
-    while (now < 8 * 3600 * 2) {
-        delay(500);
-        Serial.print(".");
-        now = time(nullptr);
-    }
-    Serial.println("");
-    struct tm timeinfo;
-    gmtime_r(&now, &timeinfo);
-    Serial.print("Current time: ");
-    Serial.println(asctime(&timeinfo));
+  // Set time via NTP, as required for x.509 validation
+  configTime(0, 0, "pool.ntp.org", "time.nist.gov");
+  Serial.println("Waiting for NTP time sync");
+  time_t now = time(nullptr);
+  while (now < 8 * 3600 * 2) {
+      delay(500);
+      Serial.print(".");
+      now = time(nullptr);
+  }
+  Serial.println("");
+  struct tm timeinfo;
+  gmtime_r(&now, &timeinfo);
+  Serial.print("Current time: ");
+  Serial.println(asctime(&timeinfo));
 }
 
 void FirmwareUpdateCheck()
 {
-    setClock();
-    X509List cert(cert_DigiCert_Global_Root_CA);
-    //change URL_fw_Version and URL_fw_Bin with your bin file and version url.
-    #define URL_fw_Version "/hafidh7/DuinoCoin-Auto-Update-Firmware-ESP8266/master/firmware/version.txt"
-    // #define URL_fw_Bin "https://github.com/hafidh7/DuinoCoin-Auto-Update-Firmware-ESP8266/releases/download/v0.1/DuinoCoin_Auto_ESP8266.bin"
-    String URL_fw_Bin= "https://"+String(firmware_host)+"/hafidh7/DuinoCoin-Auto-Update-Firmware-ESP8266/master/firmware/DuinoCoin_Auto_ESP8266.bin";
-    WiFiClientSecure client;
+  const String FirmwareVersion={"0.1"};
+  X509List cert(cert_DigiCert_Global_Root_CA);
+  //change URL_fw_Version and URL_fw_Bin with your bin file and version url.
+  #define URL_fw_Version "/hafidh7/DuinoCoin-Auto-Update-Firmware-ESP8266/master/firmware/version.txt"
+  String URL_fw_Bin= "https://"+String(firmware_host)+"/hafidh7/DuinoCoin-Auto-Update-Firmware-ESP8266/master/firmware/DuinoCoin_Auto_ESP8266.bin";
+  WiFiClientSecure client;
 
-    Serial.println("Firmware Update Check");
-    client.setTrustAnchors(&cert);
-    if (!client.connect(firmware_host, firmware_port)) {
-        Serial.print("Failed Connecting to ");
-        Serial.println(firmware_host);
-        return;
-    }
-    client.print(String("GET ") + URL_fw_Version + " HTTP/1.1\r\n" + "Host: " + firmware_host + "\r\n" + "User-Agent: BuildFailureDetectorESP8266\r\n" + "Connection: close\r\n\r\n");
-    while (client.connected()) {
-        String line = client.readStringUntil('\n');
-        if (line == "\r") {
-            //Serial.println("Headers received");
-            break;
-        }
-    }
-    String payload = client.readStringUntil('\n');
-    payload.trim();
-    if(payload.equals(FirmwareVersion)) {
-        Serial.println("Device already on latest firmware version");
-    }
-    else {
-        Serial.println("New firmware detected");
-        Serial.println("Current firmware version "+FirmwareVersion);
-        Serial.println("Firmware version "+payload+" is avalable");
-        ESPhttpUpdate.setLedPin(LED_BUILTIN, LOW);
-        t_httpUpdate_return ret = ESPhttpUpdate.update(client, URL_fw_Bin);
-        Serial.println("Update firmware to version "+payload);
-        switch (ret) {
-            case HTTP_UPDATE_FAILED:
-            Serial.printf("HTTP_UPDATE_FAILD Error (%d): %s\n", ESPhttpUpdate.getLastError(), ESPhttpUpdate.getLastErrorString().c_str());
-            break;
+  setClock();
 
-            case HTTP_UPDATE_NO_UPDATES:
-            Serial.println("HTTP_UPDATE_NO_UPDATES");
-            break;
-
-            case HTTP_UPDATE_OK:
-            Serial.println("HTTP_UPDATE_OK");
-            break;
-        }
+  Serial.println("Firmware Update Check");
+  client.setTrustAnchors(&cert);
+  if (!client.connect(firmware_host, firmware_port)) {
+    Serial.print("Failed Connecting to ");
+    Serial.println(firmware_host);
+    return;
+  }
+  client.print(String("GET ") + URL_fw_Version + " HTTP/1.1\r\n" + "Host: " + firmware_host + "\r\n" + "User-Agent: BuildFailureDetectorESP8266\r\n" + "Connection: close\r\n\r\n");
+  while (client.connected()) {
+    String line = client.readStringUntil('\n');
+    if (line == "\r") {
+      //Serial.println("Headers received");
+      break;
     }
+  }
+  String payload = client.readStringUntil('\n');
+  payload.trim();
+  if(payload.equals(FirmwareVersion)) {
+    Serial.println("Device already on latest firmware version");
+  }
+  else {
+    Serial.println("New firmware detected");
+    Serial.println("Current firmware version "+FirmwareVersion);
+    Serial.println("Firmware version "+payload+" is avalable");
+    ESPhttpUpdate.setLedPin(LED_BUILTIN, LOW);
+    t_httpUpdate_return ret = ESPhttpUpdate.update(client, URL_fw_Bin);
+    Serial.println("Update firmware to version "+payload);
+    switch (ret) {
+      case HTTP_UPDATE_FAILED:
+      Serial.printf("HTTP_UPDATE_FAILD Error (%d): %s\n", ESPhttpUpdate.getLastError(), ESPhttpUpdate.getLastErrorString().c_str());
+      break;
+
+      case HTTP_UPDATE_NO_UPDATES:
+      Serial.println("HTTP_UPDATE_NO_UPDATES");
+      break;
+
+      case HTTP_UPDATE_OK:
+      Serial.println("HTTP_UPDATE_OK");
+      break;
+      }
+  }
 }
 
 void SetupWifi() {
+  // Change the part in brackets to your WiFi name
+  const char *SSID = "My cool wifi name";
+  // Change the part in brackets to your WiFi password
+  const char *PASSWORD = "My secret wifi pass";
+
   Serial.println("Connecting to: " + String(SSID));
   WiFi.mode(WIFI_STA); // Setup ESP in client mode
   WiFi.setSleepMode(WIFI_NONE_SLEEP);
@@ -565,8 +566,6 @@ void blink(uint8_t count, uint8_t pin = LED_BUILTIN) {
         digitalWrite(pin, state ^= HIGH);
         previousMillis = currentMillis;
       }
-      // digitalWrite(pin, state ^= HIGH);
-      // delay(50);
     }
   }
 }
