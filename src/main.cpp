@@ -50,7 +50,7 @@
 #include "certs.h"
 
 // Uncomment the line below if you wish to use a DHT sensor (Duino IoT beta)
-#define USE_DHT
+// #define USE_DHT
 
 // Uncomment the line below if you wish to register for IOT updates with an MQTT broker
 // #define USE_MQTT
