@@ -4,6 +4,4 @@
 .vscode/launch.json
 .vscode/ipch
 src/lite.cpp
-src/lite
-src/main
-src/normal
+test
