@@ -450,7 +450,7 @@ void setClock()
 
 void FirmwareUpdateCheck()
 {
-  const String FirmwareVersion={"0.1"};
+  const String FirmwareVersion={"1.0"};
   X509List cert(cert_DigiCert_Global_Root_CA);
   //change URL_fw_Version and URL_fw_Bin with your bin file and version url.
   #define URL_fw_Version "/hafidh7/DuinoCoin-Auto-Update-Firmware-ESP8266/master/firmware/version.txt"
