@@ -10,3 +10,4 @@ or
 ```yaml
 python3 cert.py -s raw.githubusercontent.com -n firmware > certs.h
 ```
+for more detail : [ESP8266-Update-Program-over-HTTPS](https://github.com/hafidh7/ESP8266-Update-Program-over-HTTPS)
