@@ -1,1 +1,1 @@
-ESP8266 duino-coin miner update program from github
+ESP8266 duino-coin miner update program from github. esp8266 will flashed using .bin file at firmware folder
