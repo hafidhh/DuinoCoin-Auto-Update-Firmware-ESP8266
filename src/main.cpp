@@ -1,15 +1,15 @@
 /*
-   ____  __  __  ____  _  _  _____       ___  _____  ____  _  _
-  (  _ \(  )(  )(_  _)( \( )(  _  )___  / __)(  _  )(_  _)( \( )
-   )(_) ))(__)(  _)(_  )  (  )(_)((___)( (__  )(_)(  _)(_  )  (
-  (____/(______)(____)(_)\_)(_____)     \___)(_____)(____)(_)\_)
-  Official code for ESP8266 boards                   version 3.3
+  Duino-Coin Miner Auto Update
+
+  Visit my github :
+  https://github.com/hafidh7/
+  https://github.com/hafidh7/DuinoCoin-Auto-Update-Firmware-ESP8266
 
   Duino-Coin Team & Community 2019-2022 © MIT Licensed
   https://duinocoin.com
   https://github.com/revoxhere/duino-coin
 
-  If you don't know where to start, visit official website and navigate to
+  If you don't know where to start, visit official duinocoin website and navigate to
   the Getting Started page. Have fun mining!
 */
 
@@ -498,7 +498,7 @@ void FirmwareUpdateCheck()
       case HTTP_UPDATE_OK:
       Serial.println("HTTP_UPDATE_OK");
       break;
-      }
+    }
   }
 }
 
